@@ -1,0 +1,13 @@
+components/ui/*
+hooks/use-toast.ts
+app/admin/*
+app/deposit/*
+app/settings/*
+app/api/*
+app/activate/*
+app/network/*
+app/income/*
+app/p2p-transfer/*
+app/global-turnover/*
+app/recycle/*
+
