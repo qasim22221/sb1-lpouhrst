@@ -19,8 +19,10 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import { Suspense } from 'react';
+import { toggleTheme, getTheme } from '@/lib/theme';
 
-export default function VerifyEmailPage() {
+function VerifyEmailPageContent() {
   const [mounted, setMounted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -45,13 +47,7 @@ export default function VerifyEmailPage() {
     }
     
     // Check for dark mode preference
-    const isDarkMode = localStorage.getItem('darkMode') === 'true';
-    setDarkMode(isDarkMode);
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    setDarkMode(getTheme() === 'dark');
   }, [searchParams]);
 
   useEffect(() => {
@@ -113,24 +109,24 @@ export default function VerifyEmailPage() {
 
     try {
       // Use the service role key to verify email
-      if (supabase.auth.admin) {
-        const { error } = await supabase.auth.admin.verifyEmail(email);
-        
-        if (error) {
-          console.error("Error verifying email:", error);
-          throw new Error("Failed to verify email status");
-        }
-        
-        setIsVerified(true);
-        setSuccess('Your email has been verified! You can now sign in.');
-        
-        // Redirect to login after a delay
-        setTimeout(() => {
-          router.push('/login');
-        }, 2000);
-      } else {
-        throw new Error("Admin functions not available. Please contact support.");
-      }
+      // if (supabase.auth.admin) {
+      //   const { error } = await supabase.auth.admin.updateUserById(email, { email_confirm: true });
+      //   
+      //   if (error) {
+      //     console.error("Error verifying email:", error);
+      //     throw new Error("Failed to verify email status");
+      //   }
+      //   
+      //   setIsVerified(true);
+      //   setSuccess('Your email has been verified! You can now sign in.');
+      //   
+      //   // Redirect to login after a delay
+      //   setTimeout(() => {
+      //     router.push('/login');
+      //   }, 2000);
+      // } else {
+      //   throw new Error("Admin functions not available. Please contact support.");
+      // }
     } catch (err: any) {
       console.error("Verification check error:", err);
       setError(err.message || 'Failed to check verification status');
@@ -141,15 +137,8 @@ export default function VerifyEmailPage() {
   };
 
   const toggleDarkMode = () => {
-    const newMode = !darkMode;
-    setDarkMode(newMode);
-    localStorage.setItem('darkMode', String(newMode));
-    
-    if (newMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    toggleTheme();
+    setDarkMode(!darkMode);
   };
 
   // Don't render anything until mounted
@@ -347,5 +336,13 @@ export default function VerifyEmailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <VerifyEmailPageContent />
+    </Suspense>
   );
 }
